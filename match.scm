@@ -62,7 +62,7 @@
                      stack failure)
      (let ((top (car stack))
            (new-stack (cdr stack)))
-       (if (let* scope (equal? top '<s-expr>))
+       (if (let* scope (equal? top <s-expr>))
            (interpret-tree scope (<then> ...) new-stack failure)
            (interpret-tree scope (<alternatives> ...) stack failure))))
 
@@ -122,12 +122,12 @@
 
 (define (compile-functor box name args rest)
   (list* #'(decons)
-	 #`(compare-equal? #,name)
+	 #`(compare-equal? '#,name)
 	 (compile-args box args rest)))
 
 (define (compile-args box args rest)
   (if (null? args)
-      (cons #'(compare-equal? ()) rest)
+      (cons #'(compare-equal? '()) rest)
       (cons #'(decons)
 	    (compile-pattern box (car args)
 			     (compile-args box (cdr args)
