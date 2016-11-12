@@ -115,10 +115,10 @@
 
 (define (compile-var box var rest)
   (if (identifier-mem? var (unbox box))
-      (cons #`(compare-equal? #,var) rest)
+      (cons #`(compare-equal? #,var) (rest))
       (begin
 	(push-box! box var)
-	(cons #`(bind #,var) rest))))
+	(cons #`(bind #,var) (rest)))))
 
 (define (compile-functor box name args rest)
   (list* #'(decons)
@@ -127,11 +127,12 @@
 
 (define (compile-args box args rest)
   (if (null? args)
-      (cons #'(compare-equal? '()) rest)
+      (cons #'(compare-equal? '()) (rest))
       (cons #'(decons)
 	    (compile-pattern box (car args)
-			     (compile-args box (cdr args)
-					   rest)))))
+			     (lambda ()
+			       (compile-args box (cdr args)
+					     rest))))))
 
 )
 
@@ -143,7 +144,8 @@
   (define (compile-pattern^ entry)
     (compile-pattern (box '())
 		     (car entry)
-		     (list #`(execute #,(cadr entry)))))
+		     (lambda ()
+		       (list #`(execute #,(cadr entry))))))
   (syntax-case stx (else)
     ((match <exp> (<pattern> <body> ...) ... (else <fail> ...))
      (let* ((rules #'((<pattern> (begin <body> ...)) ...))
